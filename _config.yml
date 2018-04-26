@@ -53,6 +53,13 @@ index_generator:
   per_page: 10
   order_by: -date
   
+
+# 自动生成sitemap
+sitemap:
+  path: sitemap.xml
+baidusitemap:
+  path: baidusitemap.xml
+
 # Category & Tag
 default_category: uncategorized
 category_map:
