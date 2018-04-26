@@ -2,4 +2,6 @@
 
 <% if( theme.disqus.enable && page.comments ) { %>
 <%- partial('_partial/comments', {post: page}) %>
+<% } else if( theme.gitalk.enable && page.comments ) { %>
+    <%- partial('_partial/comment', {post: page}) %>
 <% } %>
