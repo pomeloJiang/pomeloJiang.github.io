@@ -1,0 +1,4 @@
+---
+title: algorithm
+type: categories
+---
