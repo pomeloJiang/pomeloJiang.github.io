@@ -14,7 +14,7 @@ tags: [Frameworks,Android]
 第三篇：[Android Framework之Activity启动流程(三)](https://pomelojiang.github.io/android_framework_start_activity_3)
 
 
-在文章的起始，插张时序图,先看结论再看过程。
+在文章的起始，插张时序图,先看结论再看过程。（右键-新标签页打开）
 <!-- more -->
 ![Activity启动过程时序图](../images/2018-04-26_start_activity.png)
 
@@ -342,7 +342,7 @@ private int startActivityUnchecked(final ActivityRecord r, ActivityRecord source
         if (!mTargetStack.isFocusable()
                 || (topTaskActivity != null && topTaskActivity.mTaskOverlay
                 && mStartActivity != topTaskActivity)) {
-            //目标Task的focusable为false或者源Task栈顶Activity总是在其他Activity			//之上
+            //目标Task的focusable为false或者源Task栈顶Activity总是在其他Activity之上
             //不恢复目标Task，只需确保它可见
             mTargetStack.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
             //通过WindowManagerService执行app启动动画

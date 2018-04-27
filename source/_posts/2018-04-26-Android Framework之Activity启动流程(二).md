@@ -13,10 +13,11 @@ tags: [Frameworks,Android]
 </br>
 </br>
 <!-- more -->
+
 ## ActivityManagerService#startProcessLocked
 这里又回到了ActivityManagerService。
 我们先来看一下**ActivityManagerService# startProcessLocked()**
-在ActivityStackSupervisor里调用的其实是另外一个startProcessLocked()方法，在这个方法里又调用了它的重载方法。所以我们直接来看看它的重载方法做了什么事。 
+在ActivityStackSupervisor里调用的其实是另外一个startProcessLocked()方法，在这个方法里又调用了它的重载方法。所以我们直接来看看它的重载方法做了什么事。
 ```java
 final ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
                                        boolean knownToBeDead, int intentFlags, String hostingType, ComponentName hostingName, boolean allowWhileBooting, boolean isolated, int isolatedUid, boolean keepIfLarge, String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {

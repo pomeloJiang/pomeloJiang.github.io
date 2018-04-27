@@ -203,7 +203,7 @@ final void handleResumeActivity(IBinder token,
 
 
 **至此，Activity的启动流程分析完毕。**
-看完之后感觉如何，是否恍然大悟？![全TM是套路](https://img-blog.csdn.net/20180412213610531?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3VuY2xlUG9tZWxv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+看完之后感觉如何，是否恍然大悟？![套路](../images/2018-04-27-taolu.jpg)
 
 
 </br>
