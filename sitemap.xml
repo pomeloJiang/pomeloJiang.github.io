@@ -2,6 +2,48 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://pomelojiang.github.io/git_common_commands.html</loc>
+    
+    <lastmod>2018-12-05T10:43:17.738Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://pomelojiang.github.io/linux_deploy_samba.html</loc>
+    
+    <lastmod>2018-12-05T10:43:08.864Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://pomelojiang.github.io/java_understanding_polymorphism.html</loc>
+    
+    <lastmod>2018-12-05T10:42:58.721Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://pomelojiang.github.io/android_framework_start_activity_3.html</loc>
+    
+    <lastmod>2018-12-05T10:42:44.438Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://pomelojiang.github.io/android_framework_start_activity_2.html</loc>
+    
+    <lastmod>2018-12-05T10:42:30.564Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://pomelojiang.github.io/android_framework_start_activity_1.html</loc>
+    
+    <lastmod>2018-12-05T10:42:12.091Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://pomelojiang.github.io/baidu_verify_6GYrsIPJCb.html</loc>
     
     <lastmod>2018-12-05T09:18:15.874Z</lastmod>
@@ -47,48 +89,6 @@
     <loc>http://pomelojiang.github.io/about/index.html</loc>
     
     <lastmod>2018-12-05T07:21:00.307Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://pomelojiang.github.io/linux_deploy_samba.html</loc>
-    
-    <lastmod>2018-12-05T07:21:00.304Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://pomelojiang.github.io/git_common_commands.html</loc>
-    
-    <lastmod>2018-12-05T07:21:00.303Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://pomelojiang.github.io/java_understanding_polymorphism.html</loc>
-    
-    <lastmod>2018-12-05T07:21:00.303Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://pomelojiang.github.io/android_framework_start_activity_3.html</loc>
-    
-    <lastmod>2018-12-05T07:21:00.302Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://pomelojiang.github.io/android_framework_start_activity_2.html</loc>
-    
-    <lastmod>2018-12-05T07:21:00.302Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://pomelojiang.github.io/android_framework_start_activity_1.html</loc>
-    
-    <lastmod>2018-12-05T07:21:00.301Z</lastmod>
     
   </url>
   

@@ -1,1 +1,1 @@
-http://pomelojiang.github.io/linux_deploy_samba.html
+http://pomelojiang.github.io/git_common_commands.html
