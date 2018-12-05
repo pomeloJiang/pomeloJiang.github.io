@@ -1,0 +1,42 @@
+# Header
+menu:
+  Home: /
+  Android: /categories/android
+  Java: /categories/java
+  Notes: /categories/notes
+  Chat: /categories/chat
+  Archives: /archives
+  About: /about
+
+# Content
+excerpt_link: 阅读更多
+
+# Sidebar
+author:
+  name: pomeloJiang
+  work: Android Developer
+  email: pomelojiang@gmail.com
+  location: Shenzhen, China
+  avatar_url: /images/avatar.jpg
+
+# Links:
+links:
+  github: https://github.com/pomelojiang
+  weibo: https://weibo.com/311759888
+  csdn: https://blog.csdn.net/unclepomelo
+
+
+# github comment 
+git_commit:
+  enable: true
+  client_id: 1d3d074e112b21d4b16b
+  client_secret: 6cf434c1ab62299c7424dc86f574505eb2c1d175
+  repo: pomelojiang.github.io
+  owner: pomelojiang
+  admin:
+    - pomelojiang
+  per_page: 10
+
+# Miscellaneous
+rss: /atom.xml
+favicon: /images/favicon.ico
