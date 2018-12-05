@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="UTF-8">
+
+    
+
+    
+
+    <title>柚子 | pomeloJiang</title>
+    <meta name="author" content="pomeloJiang">
+    <meta name="version" content="1.0.0">
+    <meta name="keywords" content="Android | Java | 算法">
+    <meta name="description" content="柚子的博客 | This is pomelojiang&#39;s personal blog">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+
+    
+    <link rel="alternate" href="/atom.xml" title="柚子 | pomeloJiang" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <main class="app">
+        <header class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">柚子 | pomeloJiang</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item active" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/android">
+                <span class="nav-text">Android</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/java">
+                <span class="nav-text">Java</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/notes">
+                <span class="nav-text">Notes</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/chat">
+                <span class="nav-text">Chat</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="http://pomelojiang.github.io"></form>
+
+        
+        
+
+        
+        <div class="author-meta">
+            
+            <div class="author-avatar">
+                <a href="/">
+                    <img src="/images/avatar.jpg" title="pomeloJiang">
+                </a>
+            </div>
+            
+            <div class="author-name">pomeloJiang</div>
+            <div class="author-work">Android Developer</div>
+            <div class="author-email">pomelojiang@gmail.com</div>
+            <div class="author-location">
+                <i class="icon-location vm"></i>
+                <span class="vm">Shenzhen, China</span>
+            </div>
+            
+            <div class="author-thread-wrap">
+                <div class="author-threads clearfix">
+                     
+                     <a class="thread-item" href="https://github.com/pomelojiang" target="_blank" rel="noopener"><i class="icon-github"></i></a>
+                     
+                     
+                     <a class="thread-item" href="https://weibo.com/311759888" target="_blank" rel="noopener"><i class="icon-weibo"></i></a>
+                     
+                     
+                     <a class="thread-item" href="https://blog.csdn.net/unclepomelo" target="_blank" rel="noopener"><i class="icon-csdn"></i></a>
+                     
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+    <article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/linux_deploy_samba.html">Linux与Windows共享文件之Samba部署</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/index.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-12-05T07:21:00.304Z" itemprop="datePublished">2018-12-05</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Linux/">Linux</a>, <a class="article-tag-link" href="/tags/Samba/">Samba</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="一、起因"><a href="#一、起因" class="headerlink" title="一、起因"></a>一、起因</h1><p>最近公司和展讯有个合作项目，因此他们那边派人过来驻场开发。这是一个好的机会去了解更多的开发方式，原先 xshell+vim的方式实在效率太低，调试也不方便，被我百般吐槽。终于在和他们的沟通中了解到一个工具：samba。它可以实现Linux系统和Windows之间的资源共享。有了samba，从此在Windows上也可以通过Android Studio、Source Insight等IDE编辑调试Android源码了。<br>废话不多说，直接上教程。</p>
+<h1 id="二、安装"><a href="#二、安装" class="headerlink" title="二、安装"></a>二、安装</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install samba (服务端)</span><br><span class="line">sudo apt-get install smbclient （客户端，提供测试和Linux连接）</span><br></pre></td></tr></table></figure>
+        
+        <p class="article-more-link">
+            <a href="/linux_deploy_samba.html#more">
+                <span class="vm">阅读更多</span>
+                <i class="icon-arrow-double-right vm"></i>    
+            </a>
+        </p>
+        
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/git_common_commands.html">Git常用命令</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/index.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-12-05T07:21:00.303Z" itemprop="datePublished">2018-12-05</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/笔记/">笔记</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p>Git是工作中使用最多的一个工具，平时的代码也是用git来管理。分享一下平时使用最多的Git命令。</p>
+<h1 id="Git结构图"><a href="#Git结构图" class="headerlink" title="Git结构图"></a>Git结构图</h1><p>先上一张Git结构图<br><img src="../images/2018-04-26_git_construct.png" alt="Git结构图"><br>
+        
+        </p><p class="article-more-link">
+            <a href="/git_common_commands.html#more">
+                <span class="vm">阅读更多</span>
+                <i class="icon-arrow-double-right vm"></i>    
+            </a>
+        </p>
+        
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/java_understanding_polymorphism.html">JAVA-理解多态</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/index.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-12-05T07:21:00.303Z" itemprop="datePublished">2018-12-05</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/JAVA/">JAVA</a>, <a class="article-tag-link" href="/tags/多态/">多态</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p><br></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>&emsp;&emsp;面向对象有三大特征：封装、继承、多态。<br>封装隐藏了类的内部实现机制，可以在不影响使用者的前提下改变类的内部结构，继承是为了重用父类代码，而多态呢？今天我就谈谈自己对多态的理解。</p>
+<h2 id="多态"><a href="#多态" class="headerlink" title="多态"></a>多态</h2><p>&emsp;&emsp;多态是指同一消息可以根据发送对象的不同而采用多种不同的行为方<br>式。多态具有以下几个优点：</p>
+<ol>
+<li>消除类型之间的耦合关系</li>
+<li>可替换性</li>
+<li>可扩充性</li>
+<li>接口性</li>
+<li>灵活性</li>
+<li>简化性</li>
+</ol>
+<p>多态存在的三个必要条件：继承、重写、父类引用指向子类对象<br>
+        
+        </p><p class="article-more-link">
+            <a href="/java_understanding_polymorphism.html#more">
+                <span class="vm">阅读更多</span>
+                <i class="icon-arrow-double-right vm"></i>    
+            </a>
+        </p>
+        
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/android_framework_start_activity_3.html">Android Framework之Activity启动流程(三)</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/index.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-12-05T07:21:00.302Z" itemprop="datePublished">2018-12-05</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Android/">Android</a>, <a class="article-tag-link" href="/tags/Frameworks/">Frameworks</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p>各位看官好，本文是Android Framework之Activity启动流程的第三篇，本篇将分析Activity生命周期的回调，新世界的大门就在眼前,走起。</p>
+<p>第一篇：<a href="https://pomelojiang.github.io/android_framework_start_activity_1">Android Framework之Activity启动流程(一)</a><br>第二篇：<a href="https://pomelojiang.github.io/android_framework_start_activity_2">Android Framework之Activity启动流程(二)</a></p>
+<p>执行完 <strong>ApplicationThread# handleBindApplication ()</strong> 之后，这时候新进程已经启动。<br>回到AMS# attachApplicationLocked(),代码逻辑来到了上篇文章的注释5处，调用了ActivityStackSupervisor# attachApplicationLocked,在里面又执行了realStartActivityLocked(),这样就回到了第一篇末尾所说到的第二种情况，接下来分析第二种情况。<br>
+        
+        </p><p class="article-more-link">
+            <a href="/android_framework_start_activity_3.html#more">
+                <span class="vm">阅读更多</span>
+                <i class="icon-arrow-double-right vm"></i>    
+            </a>
+        </p>
+        
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/android_framework_start_activity_2.html">Android Framework之Activity启动流程(二)</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/index.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-12-05T07:21:00.302Z" itemprop="datePublished">2018-12-05</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Android/">Android</a>, <a class="article-tag-link" href="/tags/Frameworks/">Frameworks</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p>各位看官好，本文是Android Framework之Activity启动流程的第二篇，接下来将为大家带来开启Activity进程的流程。</p>
+<p>第一篇:<a href="https://pomelojiang.github.io/android_framework_start_activity_1">Android Framework之Activity启动流程(一)</a><br>第三篇：<a href="https://pomelojiang.github.io/android_framework_start_activity_3">Android Framework之Activity启动流程(三)</a><br><br><br><br><br>
+        
+        </p><p class="article-more-link">
+            <a href="/android_framework_start_activity_2.html#more">
+                <span class="vm">阅读更多</span>
+                <i class="icon-arrow-double-right vm"></i>    
+            </a>
+        </p>
+        
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/android_framework_start_activity_1.html">Android Framework之Activity启动流程(一)</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/index.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-12-05T07:21:00.301Z" itemprop="datePublished">2018-12-05</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Android/">Android</a>, <a class="article-tag-link" href="/tags/Frameworks/">Frameworks</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p><br><br><em><font size="4px" color="#555555">本文的分析基于Android 8.1源码。</font></em><br><br>本文章将分三篇为大家讲解。<br>第二篇：<a href="https://pomelojiang.github.io/android_framework_start_activity_2">Android Framework之Activity启动流程(二)</a><br>第三篇：<a href="https://pomelojiang.github.io/android_framework_start_activity_3">Android Framework之Activity启动流程(三)</a></p>
+<p>在文章的起始，插张时序图,先看结论再看过程。（右键-新标签页打开）<br>
+        
+        </p><p class="article-more-link">
+            <a href="/android_framework_start_activity_1.html#more">
+                <span class="vm">阅读更多</span>
+                <i class="icon-arrow-double-right vm"></i>    
+            </a>
+        </p>
+        
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/first_blog.html">我的第一篇Github博客</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/index.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-04-24T16:00:00.000Z" itemprop="datePublished">2018-04-25</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/闲谈/">闲谈</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><font size="3px" color="#555555">2018都过去一个季度了，才想起来弄个个人博客，这是我的第一篇Github博客，之前都是在csdn上写，当然产量和产值都不高，不过以后我会一直坚持写。</font>
+
+<h2 id="为什么写博客"><a href="#为什么写博客" class="headerlink" title="为什么写博客"></a>为什么写博客</h2><font size="3px" color="#555555">在写博客之前，我的笔记都是放在有道云笔记上面，由于网络限制，无法与大家分享。这个博客就是想将自己的想法与大家分享，共同探讨，提高各自的水平，同时希望通过这个博客能提高个人的写作水平和和认知。</font>
+
+<font size="3px" color="#555555">每个人写作目的也不尽相同，我的写作目的主要是几下几点：</font><br><font face="微软雅黑" size="4" style="line-height:4px;"><strong>记录</strong>&nbsp;</font><font size="3px" color="#555555">记录工作中的难点和想法</font><br><font face="微软雅黑" size="4" style="line-height:4px;"><strong>分享</strong>&nbsp;</font><font size="3px" color="#555555">分享自己所了解的知识</font><br><font face="微软雅黑" size="4" style="line-height:4px;"><strong>交流</strong>&nbsp;</font><font size="3px" color="#555555">希望在这个圈子中结识到朋友</font>
+        
+        <p class="article-more-link">
+            <a href="/first_blog.html#more">
+                <span class="vm">阅读更多</span>
+                <i class="icon-arrow-double-right vm"></i>    
+            </a>
+        </p>
+        
+        
+    </section>
+</article>
+
+
+
+
+
+</div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/1.9.0/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+            
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle();
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp();
+            }, 3000);
+        }
+    });
+    </script>
+    
+
+</body>
+</html>

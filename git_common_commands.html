@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="UTF-8">
+
+    
+
+    
+
+    <title>Git常用命令 | 柚子 | pomeloJiang</title>
+    <meta name="author" content="pomeloJiang">
+    <meta name="version" content="1.0.0">
+    <meta name="keywords" content="Android | Java | 算法">
+    <meta name="description" content="Git是工作中使用最多的一个工具，平时的代码也是用git来管理。分享一下平时使用最多的Git命令。Git结构图先上一张Git结构图命令1、初始化gitgit init   //创建git clone path   //clone代码git config –global user.email “you@examle.com“  //配置emailgit config –global user.name  “name”  配置用户名2、常用操作git add &amp;lt;file&amp;gt;  ...">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+
+    
+    <link rel="alternate" href="/atom.xml" title="柚子 | pomeloJiang" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <main class="app">
+        <header class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">柚子 | pomeloJiang</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/android">
+                <span class="nav-text">Android</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/java">
+                <span class="nav-text">Java</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/notes">
+                <span class="nav-text">Notes</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/chat">
+                <span class="nav-text">Chat</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="http://pomelojiang.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Git结构图"><span class="toc-number">1.</span> <span class="toc-text">Git结构图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#命令"><span class="toc-number">2.</span> <span class="toc-text">命令</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1、初始化git"><span class="toc-number">2.1.</span> <span class="toc-text">1、初始化git</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、常用操作"><span class="toc-number">2.2.</span> <span class="toc-text">2、常用操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、撤销"><span class="toc-number">2.3.</span> <span class="toc-text">3、撤销</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4、分支"><span class="toc-number">2.4.</span> <span class="toc-text">4、分支</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5、日志"><span class="toc-number">2.5.</span> <span class="toc-text">5、日志</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6、冲突"><span class="toc-number">2.6.</span> <span class="toc-text">6、冲突</span></a></li></ol></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content"><article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Git常用命令
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/git_common_commands.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-12-05T07:21:00.303Z" itemprop="datePublished">2018-12-05</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/笔记/">笔记</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p>Git是工作中使用最多的一个工具，平时的代码也是用git来管理。分享一下平时使用最多的Git命令。</p>
+<h1 id="Git结构图"><a href="#Git结构图" class="headerlink" title="Git结构图"></a>Git结构图</h1><p>先上一张Git结构图<br><img src="../images/2018-04-26_git_construct.png" alt="Git结构图"><br><a id="more"></a></p>
+<h1 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h1><h2 id="1、初始化git"><a href="#1、初始化git" class="headerlink" title="1、初始化git"></a>1、初始化git</h2><p>git init   //创建<br>git clone path   //clone代码<br>git config –global user.email “<a href="mailto:you@examle.com" target="_blank" rel="noopener">you@examle.com</a>“  //配置email<br>git config –global user.name  “name”  配置用户名</p>
+<h2 id="2、常用操作"><a href="#2、常用操作" class="headerlink" title="2、常用操作"></a>2、常用操作</h2><p>git add &lt;<strong>file</strong>&gt;  //从workspace添加到暂存区(index)<br>git add .          //添加所有文件到暂存区<br>git commit -m “message”       //将暂存区的文件提交到本地仓库<br>git commit –amend   //与上次commit合并，可修改最新一条提交的change-id和message<br>git push origin master    //将本地仓库的修改推送至远程master分支(需要code review)<br>git pull                            //更新本地仓库（少用，推荐用下条命令）<br>git fetch &amp;&amp; git rebase origin/master      //更新远程仓库至本地并合并到master分支<br>git status                        //查看修改的文件状态<br>git diff &lt;<strong>file</strong>&gt;                   //查看文件的修改内容<br>git show commit-id        //显示某次提交的内容<br>git show branch-name   //查看某个分支的最近提交的内容<br>git show commit-id –stat  //查看commit-id的提交修改了哪些文件<br>git log -G “str” filePath/     //查找某个文件中某个字符串的提交历史<br>git stash / git stash save   //将工作区的修改存储到暂存区<br>git stash show                    //查看暂存区最近一次记录<br>git stash pop                  //取出最近一次修改<br>git stash list                  //查看暂存区列表<br>git stash apply stash@{N}  //取出暂存区列表相应的缓存<br>git stash drop stash@{N}   //删除暂存区列表对应记录</p>
+<h2 id="3、撤销"><a href="#3、撤销" class="headerlink" title="3、撤销"></a>3、撤销</h2><p>git reset  HEAD &lt;<strong>file</strong>&gt;     //将文件从暂存区恢复到工作区<br>git reset HEAD .                 //将所有文件从暂存区恢复到工作区<br>git checkout – &lt;<strong>file</strong>&gt;         //将修改的文件恢复到最新提交后的状态<br>git checkout – .                 //将所有修改的文件恢复到最新提交后的状态</p>
+<h2 id="4、分支"><a href="#4、分支" class="headerlink" title="4、分支"></a>4、分支</h2><p><em>一般修改都是在其他分支进行，最后将提交合并到主分支，所以掌握对分支的操作也是至关重要。</em></p>
+<p>git branch                                //查看当前分支<br>git branch -d branch-name      //删除 branch-name 分支<br>git checkout branch-name       //切换到 branch-name 分支<br>git cherry-pick commit-id          //合并其他分支的 commit 到当前分支<br>git checkout -b branch-name   //在当前分支的基础上创建一个新分支，并切换过去<br>git merge branch-name       //将branch-name分支的改动合并到当前分支<br>git checkout -b localName origin/remoteName  //获取远程分支removeName到本地新分支localName<br>git push origin test:test     //提交本地test分支作为远程test分支<br>git branch branch-name  SHA1_OF_HASH   //如果意外删除一个分支，可以重新创建它<br>git reflog                                                          //查看最近访问过的SHA1数<br>如果想看git rebase 和 git merge的选择时机，<a href="https://github.com/geeeeeeeeek/git-recipes/wiki/5.1-%E4%BB%A3%E7%A0%81%E5%90%88%E5%B9%B6%EF%BC%9AMerge%E3%80%81Rebase-%E7%9A%84%E9%80%89%E6%8B%A9" target="_blank" rel="noopener">请点我</a></p>
+<h2 id="5、日志"><a href="#5、日志" class="headerlink" title="5、日志"></a>5、日志</h2><p>git log                               //查看所有日志<br>git log -10                         //查看最新10条日志<br>git log –grep=”message”  //查找含有指定内容的日志<br>git log | grep “message”    // 如上<br>git log –author=”Name”       //根据作者查找日志，需加引号<br>git log &lt;<strong>file</strong>&gt;                       //查看指定文件的日志<br>git log -S “message”           //查看修改中含有“message”的日志<br>git log branch-name ^master   //查看master分支上没有的branch-name分支的内容，^表示非<br>git blame &lt;<strong>file</strong>&gt; | grep “message”  //找出谁修改了某个文件的message</p>
+<h2 id="6、冲突"><a href="#6、冲突" class="headerlink" title="6、冲突"></a>6、冲突</h2><p>git diff                            //对比差异<br>git diff HEAD                 //对比工作区和最后一次commit的差异<br>删除 &lt;&lt;&lt;&lt;, ====, &gt;&gt;&gt;&gt;等标记然后保存，需使用git add <file>和git commit -m “message”提交</file></p>
+<p>未完待续…</p>
+
+        
+    </section>
+</article>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "1d3d074e112b21d4b16b",
+        clientSecret: "6cf434c1ab62299c7424dc86f574505eb2c1d175",
+        repo: "pomelojiang.github.io",
+        owner: "pomelojiang",
+        admin: ["pomelojiang"],
+        id: "git_common_commands.html",
+        distractionFreeMode: true,
+        title: "Git常用命令",
+        body: "http://pomelojiang.github.io/git_common_commands.html",
+        labels: ["笔记"]
+    }).render('comments');
+    </script>
+</div>
+
+</div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/1.9.0/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+            
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle();
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp();
+            }, 3000);
+        }
+    });
+    </script>
+    
+        <script type="text/javascript" src="/js/scrollspy.min.js"></script>
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+        </script>
+    
+
+</body>
+</html>
