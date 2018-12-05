@@ -3,6 +3,7 @@ title: Android Framework之Activity启动流程(三)
 urlname: android_framework_start_activity_3
 categories:
 - android
+date: 2018-04-26
 tags: [Frameworks,Android]
 ---
 各位看官好，本文是Android Framework之Activity启动流程的第三篇，本篇将分析Activity生命周期的回调，新世界的大门就在眼前,走起。
