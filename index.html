@@ -120,6 +120,53 @@
     <header class="article-header">
         
         <h1 itemprop="name">
+            <a href="/android_system_booting_1.html">Android系统启动分析(一)</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/index.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-12-16T16:00:00.000Z" itemprop="datePublished">2018-12-17</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Android/">Android</a>, <a class="article-tag-link" href="/tags/Frameworks/">Frameworks</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p><strong>本文的分析基于Android 8.1源码。</strong></p>
+<p>Android系统启动与应用程序的启动流程、四大组件原理、AMS、ClassLoader等息息相关，因此了解Android系统启动流程对深入理解Android有很大的帮助。</p>
+<p>本文将分为以下几个小节讲述Android系统的系统流程，分别是：init进程启动、Zygote进程启动、SystemServer进程启动以及Launcher进程启动。</p>
+<h2 id="一、init进程启动"><a href="#一、init进程启动" class="headerlink" title="一、init进程启动"></a>一、init进程启动</h2><p>&ensp;&ensp;都知道当手机关机时不会启动任何一个进程，所以在init进程启动前，Android就为进程的启动做了很多铺垫。具体为：按下电源键加载BootLoader、拉起系统OS、启动Linux内核…但由于本人暂未学到Linux内核，因此前面的暂不做分析(当我没说emmm…)</p>
+<p>本节涉及到的文件有:</p>
+<table><tr><td>文件</td><td>路径</td></tr><tr><td>init.cpp</td><td>system/core/init/init.cpp</td></tr><tr><td>init.rc&lt;/td</td><td>system/core/rootdir/init.rc</td></tr><tr><td>init.zygote64_32.rc</td><td>system/core/rootdir/init.zygote64_32.rc</td></tr><tr><td>service.cpp</td><td>system/core/init/service.cpp</td></tr><tr><td>builtins.cpp</td> <td>system/core/init/builtins.cpp</td></tr></table>
+        
+        <p class="article-more-link">
+            <a href="/android_system_booting_1.html#more">
+                <span class="vm">阅读更多</span>
+                <i class="icon-arrow-double-right vm"></i>    
+            </a>
+        </p>
+        
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
             <a href="/git_common_commands.html">Git常用命令</a>
         </h1>
         
@@ -303,49 +350,6 @@
     <header class="article-header">
         
         <h1 itemprop="name">
-            <a href="/android_framework_start_activity_2.html">Android Framework之Activity启动流程(二)</a>
-        </h1>
-        
-        <div class="article-meta clearfix">
-            <a class="article-date" href="http://pomelojiang.github.io/index.html">
-    
-    <i class="icon-calendar"></i>
-    
-    <time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time>
-</a>
-
-            
-<div class="article-tag-list">
-    <i class="icon-tag"></i>
-    <a class="article-tag-link" href="/tags/Android/">Android</a>, <a class="article-tag-link" href="/tags/Frameworks/">Frameworks</a>
-</div>
-
-
-        </div>
-    </header>
-    
-    <section class="article-body markdown-body">
-        
-        <p>各位看官好，本文是Android Framework之Activity启动流程的第二篇，接下来将为大家带来开启Activity进程的流程。</p>
-<p>第一篇:<a href="https://pomelojiang.github.io/android_framework_start_activity_1">Android Framework之Activity启动流程(一)</a><br>第三篇：<a href="https://pomelojiang.github.io/android_framework_start_activity_3">Android Framework之Activity启动流程(三)</a><br><br><br><br><br>
-        
-        </p><p class="article-more-link">
-            <a href="/android_framework_start_activity_2.html#more">
-                <span class="vm">阅读更多</span>
-                <i class="icon-arrow-double-right vm"></i>    
-            </a>
-        </p>
-        
-        
-    </section>
-</article>
-
-
-    <article class="article" itemscope="" itemprop="blogPost">
-    
-    <header class="article-header">
-        
-        <h1 itemprop="name">
             <a href="/android_framework_start_activity_1.html">Android Framework之Activity启动流程(一)</a>
         </h1>
         
@@ -374,6 +378,49 @@
         
         </p><p class="article-more-link">
             <a href="/android_framework_start_activity_1.html#more">
+                <span class="vm">阅读更多</span>
+                <i class="icon-arrow-double-right vm"></i>    
+            </a>
+        </p>
+        
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/android_framework_start_activity_2.html">Android Framework之Activity启动流程(二)</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/index.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-04-25T16:00:00.000Z" itemprop="datePublished">2018-04-26</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Android/">Android</a>, <a class="article-tag-link" href="/tags/Frameworks/">Frameworks</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p>各位看官好，本文是Android Framework之Activity启动流程的第二篇，接下来将为大家带来开启Activity进程的流程。</p>
+<p>第一篇:<a href="https://pomelojiang.github.io/android_framework_start_activity_1">Android Framework之Activity启动流程(一)</a><br>第三篇：<a href="https://pomelojiang.github.io/android_framework_start_activity_3">Android Framework之Activity启动流程(三)</a><br><br><br><br><br>
+        
+        </p><p class="article-more-link">
+            <a href="/android_framework_start_activity_2.html#more">
                 <span class="vm">阅读更多</span>
                 <i class="icon-arrow-double-right vm"></i>    
             </a>

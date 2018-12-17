@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="UTF-8">
+
+    
+
+    
+
+    <title>Android系统启动分析(一) | 柚子 | pomeloJiang</title>
+    <meta name="author" content="pomeloJiang">
+    <meta name="version" content="1.0.0">
+    <meta name="keywords" content="Android | Java | 算法">
+    <meta name="description" content="本文的分析基于Android 8.1源码。Android系统启动与应用程序的启动流程、四大组件原理、AMS、ClassLoader等息息相关，因此了解Android系统启动流程对深入理解Android有很大的帮助。本文将分为以下几个小节讲述Android系统的系统流程，分别是：init进程启动、Zygote进程启动、SystemServer进程启动以及Launcher进程启动。一、init进程启动&amp;ensp;&amp;ensp;都知道当手机关机时不会启动任何一个进程，所以在init进程启动前...">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+
+    
+    <link rel="alternate" href="/atom.xml" title="柚子 | pomeloJiang" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <main class="app">
+        <header class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">柚子 | pomeloJiang</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/android">
+                <span class="nav-text">Android</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/java">
+                <span class="nav-text">Java</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/notes">
+                <span class="nav-text">Notes</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/chat">
+                <span class="nav-text">Chat</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="http://pomelojiang.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一、init进程启动"><span class="toc-number">1.</span> <span class="toc-text">一、init进程启动</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-init-main"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 init.main()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-1-解析service"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.2.1 解析service</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-2-启动ServiceManager"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2.2 启动ServiceManager</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-3-启动Zygote"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.2.3 启动Zygote</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二、Zygote进程启动"><span class="toc-number">2.</span> <span class="toc-text">二、Zygote进程启动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三、SystemServer进程启动"><span class="toc-number">3.</span> <span class="toc-text">三、SystemServer进程启动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#四、Launcher启动"><span class="toc-number">4.</span> <span class="toc-text">四、Launcher启动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#五、总结"><span class="toc-number">5.</span> <span class="toc-text">五、总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#参考"><span class="toc-number">5.1.</span> <span class="toc-text">参考</span></a></li></ol></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content"><article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Android系统启动分析(一)
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/android_system_booting_1.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-12-16T16:00:00.000Z" itemprop="datePublished">2018-12-17</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Android/">Android</a>, <a class="article-tag-link" href="/tags/Frameworks/">Frameworks</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p><strong>本文的分析基于Android 8.1源码。</strong></p>
+<p>Android系统启动与应用程序的启动流程、四大组件原理、AMS、ClassLoader等息息相关，因此了解Android系统启动流程对深入理解Android有很大的帮助。</p>
+<p>本文将分为以下几个小节讲述Android系统的系统流程，分别是：init进程启动、Zygote进程启动、SystemServer进程启动以及Launcher进程启动。</p>
+<h2 id="一、init进程启动"><a href="#一、init进程启动" class="headerlink" title="一、init进程启动"></a>一、init进程启动</h2><p>&ensp;&ensp;都知道当手机关机时不会启动任何一个进程，所以在init进程启动前，Android就为进程的启动做了很多铺垫。具体为：按下电源键加载BootLoader、拉起系统OS、启动Linux内核…但由于本人暂未学到Linux内核，因此前面的暂不做分析(当我没说emmm…)</p>
+<p>本节涉及到的文件有:</p>
+<table><tr><td>文件</td><td>路径</td></tr><tr><td>init.cpp</td><td>system/core/init/init.cpp</td></tr><tr><td>init.rc&lt;/td</td><td>system/core/rootdir/init.rc</td></tr><tr><td>init.zygote64_32.rc</td><td>system/core/rootdir/init.zygote64_32.rc</td></tr><tr><td>service.cpp</td><td>system/core/init/service.cpp</td></tr><tr><td>builtins.cpp</td> <td>system/core/init/builtins.cpp</td></tr></table>
+
+<a id="more"></a>
+<h3 id="1-1-init-main"><a href="#1-1-init-main" class="headerlink" title="1.1 init.main()"></a>1.1 init.main()</h3><p>&ensp;&ensp;Linux内核启动后，运行的第一个进程是init进程。</p>
+<table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> system/core/init/init.cpp </font></td></tr></table><br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>** argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(basename(argv[<span class="number">0</span>]), <span class="string">"ueventd"</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> ueventd_main(argc, argv);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(basename(argv[<span class="number">0</span>]), <span class="string">"watchdogd"</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> watchdogd_main(argc, argv);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (REBOOT_BOOTLOADER_ON_PANIC) &#123;</span><br><span class="line">        InstallRebootSignalHandlers();</span><br><span class="line">    &#125;</span><br><span class="line">    add_environment(<span class="string">"PATH"</span>, _PATH_DEFPATH);</span><br><span class="line">    <span class="keyword">bool</span> is_first_stage = (getenv(<span class="string">"INIT_SECOND_STAGE"</span>) == <span class="literal">nullptr</span>);</span><br><span class="line">    <span class="comment">//注释1:挂载必须的文件路径</span></span><br><span class="line">    <span class="keyword">if</span> (is_first_stage) &#123;</span><br><span class="line">        ……</span><br><span class="line">        mount(<span class="string">"tmpfs"</span>, <span class="string">"/dev"</span>, <span class="string">"tmpfs"</span>, MS_NOSUID, <span class="string">"mode=0755"</span>);</span><br><span class="line">        mkdir(<span class="string">"/dev/pts"</span>, <span class="number">0755</span>);</span><br><span class="line">        mkdir(<span class="string">"/dev/socket"</span>, <span class="number">0755</span>);</span><br><span class="line">        mount(<span class="string">"devpts"</span>, <span class="string">"/dev/pts"</span>, <span class="string">"devpts"</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">        <span class="meta">#<span class="meta-keyword">define</span> MAKE_STR(x) __STRING(x)</span></span><br><span class="line">        mount(<span class="string">"proc"</span>, <span class="string">"/proc"</span>, <span class="string">"proc"</span>, <span class="number">0</span>, <span class="string">"hidepid=2,gid="</span> MAKE_STR(AID_READPROC));</span><br><span class="line">        <span class="comment">// Don't expose the raw commandline to unprivileged processes.</span></span><br><span class="line">        chmod(<span class="string">"/proc/cmdline"</span>, <span class="number">0440</span>);</span><br><span class="line">        <span class="keyword">gid_t</span> groups[] = &#123; AID_READPROC &#125;;</span><br><span class="line">        setgroups(arraysize(groups), groups);</span><br><span class="line">        mount(<span class="string">"sysfs"</span>, <span class="string">"/sys"</span>, <span class="string">"sysfs"</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">        mount(<span class="string">"selinuxfs"</span>, <span class="string">"/sys/fs/selinux"</span>, <span class="string">"selinuxfs"</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">        mknod(<span class="string">"/dev/kmsg"</span>, S_IFCHR | <span class="number">0600</span>, makedev(<span class="number">1</span>, <span class="number">11</span>));</span><br><span class="line">        mknod(<span class="string">"/dev/random"</span>, S_IFCHR | <span class="number">0666</span>, makedev(<span class="number">1</span>, <span class="number">8</span>));</span><br><span class="line">        mknod(<span class="string">"/dev/urandom"</span>, S_IFCHR | <span class="number">0666</span>, makedev(<span class="number">1</span>, <span class="number">9</span>));</span><br><span class="line">        <span class="comment">//system/core/init/init_first_stage.cpp</span></span><br><span class="line">        SetInitAvbVersionInRecovery();</span><br><span class="line">        <span class="comment">//加载及初始化SELinux</span></span><br><span class="line">        selinux_initialize(<span class="literal">true</span>);</span><br><span class="line">        ……</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//初始化Kernel Log</span></span><br><span class="line">    InitKernelLogging(argv);</span><br><span class="line">    <span class="comment">//bionic/libc/bionic/system_properties.cpp</span></span><br><span class="line">    <span class="comment">//注释2:初始化属性服务</span></span><br><span class="line">    property_init();</span><br><span class="line">    ……</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    signal_handler_init();</span><br><span class="line">    <span class="comment">//导入默认的环境变量</span></span><br><span class="line">    <span class="comment">//"/system/etc/prop.default,/odm/default.prop,/vendor/default.prop"</span></span><br><span class="line">    property_load_boot_defaults();</span><br><span class="line">    <span class="comment">//启动属性服务</span></span><br><span class="line">    start_property_service();</span><br><span class="line">    ……</span><br><span class="line">    <span class="keyword">const</span> BuiltinFunctionMap function_map;</span><br><span class="line">    Action::set_function_map(&amp;function_map);</span><br><span class="line">    ActionManager&amp; am = ActionManager::GetInstance();</span><br><span class="line">    ServiceManager&amp; sm = ServiceManager::GetInstance();</span><br><span class="line">    Parser&amp; parser = Parser::GetInstance();</span><br><span class="line">    <span class="comment">//make_unique是C++的智能指针,可以自动管理内存</span></span><br><span class="line">    <span class="comment">//ServiceParser、ActionParser、ImportParser分别解析service,action,import</span></span><br><span class="line">    parser.AddSectionParser(<span class="string">"service"</span>, <span class="built_in">std</span>::make_unique&lt;ServiceParser&gt;(&amp;sm));</span><br><span class="line">    parser.AddSectionParser(<span class="string">"on"</span>, <span class="built_in">std</span>::make_unique&lt;ActionParser&gt;(&amp;am));</span><br><span class="line">    parser.AddSectionParser(<span class="string">"import"</span>, <span class="built_in">std</span>::make_unique&lt;ImportParser&gt;(&amp;parser));</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> bootscript = GetProperty(<span class="string">"ro.boot.init_rc"</span>, <span class="string">""</span>);</span><br><span class="line">    <span class="keyword">if</span> (bootscript.empty()) &#123;</span><br><span class="line">    	<span class="comment">//若不存在"ro.boot.init_rc"属性，则解析下列文件</span></span><br><span class="line">	    parser.ParseConfig(<span class="string">"/init.rc"</span>); <span class="comment">//注释3,解析init.rc</span></span><br><span class="line">    	parser.set_is_system_etc_init_loaded(</span><br><span class="line">    	parser.ParseConfig(<span class="string">"/system/etc/init"</span>));</span><br><span class="line">    	parser.set_is_vendor_etc_init_loaded(</span><br><span class="line">    	parser.ParseConfig(<span class="string">"/vendor/etc/init"</span>));</span><br><span class="line">parser.set_is_odm_etc_init_loaded(parser.ParseConfig(<span class="string">"/odm/etc/init"</span>));</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">//如果"ro.boot.init_rc"属性存在，则解析属性值</span></span><br><span class="line">    	parser.ParseConfig(bootscript);</span><br><span class="line">    	parser.set_is_system_etc_init_loaded(<span class="literal">true</span>);</span><br><span class="line">    	parser.set_is_vendor_etc_init_loaded(<span class="literal">true</span>);</span><br><span class="line">    	parser.set_is_odm_etc_init_loaded(<span class="literal">true</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	……</span><br><span class="line"> 	<span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="comment">// By default, sleep until something happens.</span></span><br><span class="line">        <span class="keyword">int</span> epoll_timeout_ms = <span class="number">-1</span>;</span><br><span class="line">        <span class="comment">//重置shutting_down标志</span></span><br><span class="line">        <span class="keyword">if</span> (do_shutdown &amp;&amp; !shutting_down) &#123;</span><br><span class="line">            do_shutdown = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">if</span> (HandlePowerctlMessage(shutdown_command)) &#123;</span><br><span class="line">                shutting_down = <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!(waiting_for_prop || sm.IsWaitingForExec())) &#123;</span><br><span class="line">            <span class="comment">//执行每个Action所带的执行函数</span></span><br><span class="line">            am.ExecuteOneCommand();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!(waiting_for_prop || sm.IsWaitingForExec())) &#123;</span><br><span class="line">            <span class="comment">//重启死去的进程</span></span><br><span class="line">            <span class="keyword">if</span> (!shutting_down) restart_processes();</span><br><span class="line">            ……</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br><br>init进程做的事较多，但我们只需关注几点：<br><br>1. 注释1处创建和挂载启动所需的文件<br>2. 注释2处初始化属性服务,随后调用start_property_service()启动属性服务<br>3. 注释3处解析<strong>/init.rc,{/system,/vendor,/odm}/etc/init</strong>几个文件<br><br>### 1.2 解析init.rc<br><br>init.rc是用Android初始化语言(Android Init Language)编写的文件,在init文件夹中的README对它有描述。感兴趣的可以自行去看。<br><br><table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> system/core/init/README.md </font></td></tr></table>
+
+<p>AIL主要包含5种类型的语句:Actions, Commands, Services, Options, Imports.</p>
+<p>重点来看看Actions和Services</p>
+<p><strong>Actions的格式</strong>如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">on &lt;trigger&gt; [&amp;&amp; &lt;trigger&gt;]*   #触发条件</span><br><span class="line">   &lt;command&gt;                   #操作命令</span><br><span class="line">   &lt;command&gt;</span><br></pre></td></tr></table></figure>
+<p>例如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">on charger</span><br><span class="line">    class_start charger</span><br></pre></td></tr></table></figure>
+<p>只要条件charger成立，便会执行 class_start charger 命令</p>
+<p><strong>Services的格式</strong>如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">service &lt;name&gt; &lt;pathname&gt; [&lt;argument&gt;] #&lt;service服务名称&gt;&lt;执行文件路径&gt;&lt;参数&gt;</span><br><span class="line">   &lt;option&gt;                           #这个服务的一些配置</span><br><span class="line">   &lt;option&gt;</span><br></pre></td></tr></table></figure>
+<p>例如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">service adbd /system/bin/adbd --root_seclabel=u:r:su:s0</span><br><span class="line">    class core</span><br><span class="line">    socket adbd stream 660 system system</span><br><span class="line">    disabled</span><br><span class="line">    seclabel u:r:adbd:s0</span><br></pre></td></tr></table></figure></p>
+<p>这是init.usb.rc的一段代码,用来启动adbd服务</p>
+<p>了解了AIL语言后，我们来看看init.rc,代码路径如下:</p>
+<table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> system/core/rootdir/init.rc </font></td></tr></table>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">import /init.environ.rc</span><br><span class="line">import /init.usb.rc</span><br><span class="line">import /init.$&#123;ro.hardware&#125;.rc</span><br><span class="line">import /vendor/etc/init/hw/init.$&#123;ro.hardware&#125;.rc</span><br><span class="line">import /init.usb.configfs.rc</span><br><span class="line">import /init.$&#123;ro.zygote&#125;.rc</span><br><span class="line">……</span><br></pre></td></tr></table></figure>
+<p>在init.rc开始位置引入了一些rc文件,重点关注Zygote启动相关的文件。<strong>/init.${ro.zygote}.rc</strong></p>
+<p>这里根据ro.zygote属性值加载对应的rc文件。这个属性值可通过<strong>adb shell getprop | grep “zygote”</strong>获取。</p>
+<p>例如在我的手机上该属性值为: [ro.zygote]: [zygote64_32]</p>
+<p>在我手机上启动Zygote会涉及到init.zygote64_32.rc,代码路径如下:</p>
+<table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> system/core/rootdir/init.zygote64_32.rc </font></td></tr></table>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">service zygote /system/bin/app_process64 -Xzygote /system/bin --zygote --start-system-server --socket-name=zygote</span><br><span class="line">    class main</span><br><span class="line">    priority -20</span><br><span class="line">    user root</span><br><span class="line">    group root readproc</span><br><span class="line">    socket zygote stream 660 root system</span><br><span class="line">    onrestart write /sys/android_power/request_state wake</span><br><span class="line">    onrestart write /sys/power/state on</span><br><span class="line">    onrestart restart audioserver</span><br><span class="line">    onrestart restart cameraserver</span><br><span class="line">    onrestart restart media</span><br><span class="line">    onrestart restart netd</span><br><span class="line">    onrestart restart wificond</span><br><span class="line">    writepid /dev/cpuset/foreground/tasks</span><br><span class="line">service zygote_secondary /system/bin/app_process32 -Xzygote /system/bin --zygote --socket-name=zygote_secondary --enable-lazy-preload</span><br><span class="line">    class main</span><br><span class="line">    priority -20</span><br><span class="line">    user root</span><br><span class="line">    group root readproc</span><br><span class="line">    socket zygote_secondary stream 660 root system</span><br><span class="line">    onrestart restart zygote</span><br><span class="line">    writepid /dev/cpuset/foreground/tasks</span><br></pre></td></tr></table></figure>
+<p>可以看到该文件里有两个service,最大的区别就是对应的可执行文件不一样。可以看到,启动64位的Zygote需要执行/system/bin/app_process64,后面是传入的参数。<br>那么zygote的service是怎么被解析的呢? 我们回忆一下init.main()。</p>
+<table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> system/core/init/init.cpp </font></td></tr></table>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>** argv)</span> </span>&#123;</span><br><span class="line">    ……</span><br><span class="line">    ServiceManager&amp; sm = ServiceManager::GetInstance();</span><br><span class="line">    Parser&amp; parser = Parser::GetInstance();</span><br><span class="line">    <span class="comment">//make_unique是C++的智能指针,可以自动管理内存</span></span><br><span class="line">    <span class="comment">//ServiceParser、ActionParser、ImportParser分别解析service,action,import</span></span><br><span class="line">    parser.AddSectionParser(<span class="string">"service"</span>, <span class="built_in">std</span>::make_unique&lt;ServiceParser&gt;(&amp;sm));	</span><br><span class="line">    ……</span><br><span class="line"> 	parser.ParseConfig(<span class="string">"/init.rc"</span>);</span><br><span class="line">    ……</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>AddSectionParser函数将”service”当做键,ServiceParser对象当做值,存到一个map中,执行ParseConfig函数后,会调用ServiceParser的ParseSection和ParseLineSection函数来解析service语句。</p>
+<h4 id="1-2-1-解析service"><a href="#1-2-1-解析service" class="headerlink" title="1.2.1 解析service"></a>1.2.1 解析service</h4><table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> system/core/init/service.cpp </font></td></tr></table>
+
+<p>ServiceParser的实现在 system/core/init/service.cpp中,ParseSection的实现如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> ServiceParser::ParseSection(<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;&amp;&amp; args, <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; filename,<span class="keyword">int</span> line, <span class="built_in">std</span>::<span class="built_in">string</span>* err) &#123;</span><br><span class="line">    <span class="keyword">if</span> (args.size() &lt; <span class="number">3</span>) &#123;</span><br><span class="line">        *err = <span class="string">"services must have a name and a program"</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">   	<span class="comment">//获取服务名</span></span><br><span class="line">    <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; name = args[<span class="number">1</span>];</span><br><span class="line">    <span class="keyword">if</span> (!IsValidName(name)) &#123; <span class="comment">//检查service的name是否有效</span></span><br><span class="line">        *err = StringPrintf(<span class="string">"invalid service name '%s'"</span>, name.c_str());</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    Service* old_service = service_manager_-&gt;FindServiceByName(name);</span><br><span class="line">    <span class="keyword">if</span> (old_service) &#123;</span><br><span class="line">        *err = <span class="string">"ignored duplicate definition of service '"</span> + name + <span class="string">"'"</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; str_args(args.begin() + <span class="number">2</span>, args.end());</span><br><span class="line">    <span class="comment">//将service_指针指向当前Service对象</span></span><br><span class="line">    service_ = <span class="built_in">std</span>::make_unique&lt;Service&gt;(name, str_args);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>ParseSection主要检验参数的有效性,并构造一个Service对象。</p>
+<p>接下来看看ParseLineSection</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> ServiceParser::ParseLineSection(<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;&amp;&amp; args, <span class="keyword">int</span> line, <span class="built_in">std</span>::<span class="built_in">string</span>* err) &#123;</span><br><span class="line">    <span class="keyword">return</span> service_ ? service_-&gt;ParseLine(<span class="built_in">std</span>::move(args), err) : <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再来看看ParseLine<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> Service::ParseLine(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;&amp; args, <span class="built_in">std</span>::<span class="built_in">string</span>* err) &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">const</span> OptionParserMap parser_map;</span><br><span class="line">    <span class="keyword">auto</span> parser = parser_map.FindFunction(args, err); <span class="comment">//1</span></span><br><span class="line">    <span class="keyword">if</span> (!parser) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">this</span>-&gt;*parser)(args, err); <span class="comment">//2</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>ParseLine的作用是为Service的每一个Option指定处理函数。</p>
+<p>注释1处FindFunction根据传入的args找到对应的处理函数,并在注释2的return语句中调用。</p>
+<p>具体的Options和对应的函数在Service::OptionParserMap::map()中定义</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Service::OptionParserMap::Map&amp; Service::OptionParserMap::<span class="built_in">map</span>() <span class="keyword">const</span> &#123;</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="built_in">std</span>::<span class="keyword">size_t</span> kMax = <span class="built_in">std</span>::numeric_limits&lt;<span class="built_in">std</span>::<span class="keyword">size_t</span>&gt;::max();</span><br><span class="line">    <span class="comment">// clang-format off</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">const</span> Map option_parsers = &#123;</span><br><span class="line">        ……</span><br><span class="line">        &#123;<span class="string">"priority"</span>,    &#123;<span class="number">1</span>,<span class="number">1</span>,&amp;Service::ParsePriority&#125;&#125;,</span><br><span class="line">       ……</span><br><span class="line">        &#123;<span class="string">"namespace"</span>,   &#123;<span class="number">1</span>,<span class="number">2</span>,&amp;Service::ParseNamespace&#125;&#125;,</span><br><span class="line">		……</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">// clang-format on</span></span><br><span class="line">    <span class="keyword">return</span> option_parsers;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>解析完所有数据后,会调用EndSection函数<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> ServiceParser::EndSection() &#123;</span><br><span class="line">    <span class="keyword">if</span> (service_) &#123;</span><br><span class="line">        service_manager_-&gt;AddService(<span class="built_in">std</span>::move(service_));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在EndSection中又调用了ServiceManager的AddService函数。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> ServiceManager::AddService(<span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;Service&gt; service) &#123;</span><br><span class="line">    services_.emplace_back(<span class="built_in">std</span>::move(service));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>EndSection的主要工作是将解析完成的Service添加到ServiceManager的service_链表中。</p>
+<h4 id="1-2-2-启动ServiceManager"><a href="#1-2-2-启动ServiceManager" class="headerlink" title="1.2.2 启动ServiceManager"></a>1.2.2 启动ServiceManager</h4><p>ServiceManager用来管理系统中所有的binder service,最主要的作用是注册添加服务和Zygote进程启动。</p>
+<table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> system/core/rootdir/init.rc </font></td></tr></table> 
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">on post-fs</span><br><span class="line">	……</span><br><span class="line">    start servicemanager</span><br><span class="line">    ……</span><br></pre></td></tr></table></figure>
+<h4 id="1-2-3-启动Zygote"><a href="#1-2-3-启动Zygote" class="headerlink" title="1.2.3 启动Zygote"></a>1.2.3 启动Zygote</h4><table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> system/core/rootdir/init.rc </font></td></tr></table> 
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">on nonencrypted</span><br><span class="line">    class_start main</span><br><span class="line">    class_start late_start</span><br></pre></td></tr></table></figure>
+<p>这是一个Action语句,class_start对应的函数是do_class_start, <strong>class_start main</strong>会启动classname为main的Service</p>
+<table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> system/core/init/builtins.cpp </font></td></tr></table>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">do_class_start</span><span class="params">(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;&amp; args)</span> </span>&#123;</span><br><span class="line">    ServiceManager::GetInstance().</span><br><span class="line">        ForEachServiceInClass(args[<span class="number">1</span>], [] (Service* s) &#123; s-&gt;StartIfNotDisabled(); &#125;);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ForEachServiceInClass会找到classname为main的Service,并执行Service的StartIfNotDisabled。</p>
+<table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> system/core/init/service.cpp </font></td></tr></table>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> Service::StartIfNotDisabled() &#123;</span><br><span class="line">    <span class="keyword">if</span> (!(flags_ &amp; SVC_DISABLED)) &#123;</span><br><span class="line">        <span class="keyword">return</span> Start();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        flags_ |= SVC_DISABLED_START;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接着进入到Start()函数。Start函数较长,这里只截取关键部分分析。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">bool Service::Start() &#123;</span><br><span class="line">    flags_ &amp;= (~(SVC_DISABLED|SVC_RESTARTING|SVC_RESET|SVC_RESTART|SVC_DISABLED_START));</span><br><span class="line">    //如果Service已经启动,则直接返回</span><br><span class="line">    if (flags_ &amp; SVC_RUNNING) &#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">    //对Service判断,设置一些Flag</span><br><span class="line">	……</span><br><span class="line">    pid_t pid = -1;</span><br><span class="line">    if (namespace_flags_) &#123;</span><br><span class="line">        pid = clone(nullptr, nullptr, namespace_flags_ | SIGCHLD, nullptr);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        pid = fork();</span><br><span class="line">    &#125;</span><br><span class="line">    if (pid == 0) &#123;</span><br><span class="line">        //fork出子进程后,为子进程设置参数</span><br><span class="line">        ……</span><br><span class="line">        //执行对应Service的对应执行文件</span><br><span class="line">        //调用execve函数执行程序</span><br><span class="line">      	if (!ExpandArgsAndExecve(args_)) &#123;</span><br><span class="line">    		PLOG(ERROR) &lt;&lt; &quot;cannot execve(&apos;&quot; &lt;&lt; args_[0] &lt;&lt; &quot;&apos;)&quot;;</span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ……</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Start()函数先通过fork函数创建一个子进程,然后在子进程中调用ExpandArgsAndExecve()-&gt;execve()函数启动一个新的程序。fork()+execve()结合可以产生一个新的进程,这里涉及到Linux内核层面,便不再继续深入。</p>
+<p>由init.zygote64_32.rc可知,Zygote的执行路径为:<strong>/system/bin/app_process64</strong>,执行该程序后,不管是32位还是64位系统,都会进入到framework/cmds/app_process/app_main.cpp的main()函数。</p>
+<p>由此可知,Zygote进程也不是凭空产生,而是由Init进程fork而来。</p>
+<p>至此,代码流程进入到framework层,关于Zygote进程的启动将在下节讲解。</p>
+<h2 id="二、Zygote进程启动"><a href="#二、Zygote进程启动" class="headerlink" title="二、Zygote进程启动"></a>二、Zygote进程启动</h2><h2 id="三、SystemServer进程启动"><a href="#三、SystemServer进程启动" class="headerlink" title="三、SystemServer进程启动"></a>三、SystemServer进程启动</h2><h2 id="四、Launcher启动"><a href="#四、Launcher启动" class="headerlink" title="四、Launcher启动"></a>四、Launcher启动</h2><h2 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h2><h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="https://blog.csdn.net/hongbochen1223/article/details/56331690" target="_blank" rel="noopener">https://blog.csdn.net/hongbochen1223/article/details/56331690</a><br><a href="https://juejin.im/post/5aaf125d6fb9a028db587c50" target="_blank" rel="noopener">https://juejin.im/post/5aaf125d6fb9a028db587c50</a><br><a href="https://blog.csdn.net/itachi85/article/details/54783506" target="_blank" rel="noopener">https://blog.csdn.net/itachi85/article/details/54783506</a><br><a href="https://blog.csdn.net/zhonglunshun/article/details/78615980" target="_blank" rel="noopener">https://blog.csdn.net/zhonglunshun/article/details/78615980</a><br><a href="https://juejin.im/post/59f4592e51882529405991cb#heading-6" target="_blank" rel="noopener">https://juejin.im/post/59f4592e51882529405991cb#heading-6</a></p>
+
+        
+    </section>
+</article>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "1d3d074e112b21d4b16b",
+        clientSecret: "6cf434c1ab62299c7424dc86f574505eb2c1d175",
+        repo: "pomelojiang.github.io",
+        owner: "pomelojiang",
+        admin: ["pomelojiang"],
+        id: "android_system_booting_1.html",
+        distractionFreeMode: true,
+        title: "Android系统启动分析(一)",
+        body: "http://pomelojiang.github.io/android_system_booting_1.html",
+        labels: ["Frameworks","Android"]
+    }).render('comments');
+    </script>
+</div>
+
+</div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/1.9.0/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+            
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle();
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp();
+            }, 3000);
+        }
+    });
+    </script>
+    
+        <script type="text/javascript" src="/js/scrollspy.min.js"></script>
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+        </script>
+    
+
+</body>
+</html>
