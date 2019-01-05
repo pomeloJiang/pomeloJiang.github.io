@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="UTF-8">
+
+    
+
+    
+
+    <title>Android系统启动分析(三) | 柚子 | pomeloJiang</title>
+    <meta name="author" content="pomeloJiang">
+    <meta name="version" content="1.0.0">
+    <meta name="keywords" content="Android | Java | 算法">
+    <meta name="description" content="本节是本系列文章的第三篇,将分析System_Server进程的启动过程和Launcher的启动过程。第一篇文章:Android系统启动分析(一)第二篇文章:Android系统启动分析(二)本节涉及到的文件有:			文件		路径				ZygoteInit.java		frameworks/base/core/java/com/android/internal/os/ZygoteInit.java				ZygoteServer.java		framewo...">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+
+    
+    <link rel="alternate" href="/atom.xml" title="柚子 | pomeloJiang" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <main class="app">
+        <header class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">柚子 | pomeloJiang</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/android">
+                <span class="nav-text">Android</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/java">
+                <span class="nav-text">Java</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/notes">
+                <span class="nav-text">Notes</span>
+            </a>
+        
+            <a class="nav-item" href="/categories/chat">
+                <span class="nav-text">Chat</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="http://pomelojiang.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#三、SystemServer进程启动"><span class="toc-number">1.</span> <span class="toc-text">三、SystemServer进程启动</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-ZygoteInit-forkSystemServer"><span class="toc-number">1.1.</span> <span class="toc-text">3.1 ZygoteInit.forkSystemServer</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-1-handleSystemServerProcess"><span class="toc-number">1.1.1.</span> <span class="toc-text">3.1.1 handleSystemServerProcess</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-2-ZygoteInit-zygoteInit"><span class="toc-number">1.1.2.</span> <span class="toc-text">3.1.2 ZygoteInit.zygoteInit</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-3-启动Binder线程池"><span class="toc-number">1.1.3.</span> <span class="toc-text">3.1.3 启动Binder线程池</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-4-RuntimeInit-applicationInit"><span class="toc-number">1.1.4.</span> <span class="toc-text">3.1.4 RuntimeInit.applicationInit</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-解析SystemServer"><span class="toc-number">1.2.</span> <span class="toc-text">3.2 解析SystemServer</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-1-startBootstrapServices"><span class="toc-number">1.2.1.</span> <span class="toc-text">3.2.1 startBootstrapServices</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-2-startCoreServices"><span class="toc-number">1.2.2.</span> <span class="toc-text">3.2.2 startCoreServices</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-3-startOtherServices"><span class="toc-number">1.2.3.</span> <span class="toc-text">3.2.3 startOtherServices</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-4-系统服务的启动"><span class="toc-number">1.2.4.</span> <span class="toc-text">3.2.4 系统服务的启动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-SystemServer进程总结"><span class="toc-number">1.3.</span> <span class="toc-text">3.3 SystemServer进程总结</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参考"><span class="toc-number">1.4.</span> <span class="toc-text">参考</span></a></li></ol></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content"><article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Android系统启动分析(三)
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/android_system_booting_3.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2018-12-22T16:00:00.000Z" itemprop="datePublished">2018-12-23</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Android/">Android</a>, <a class="article-tag-link" href="/tags/Frameworks/">Frameworks</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p>本节是本系列文章的第三篇,将分析System_Server进程的启动过程和Launcher的启动过程。</p>
+<p>第一篇文章:<a href="./android_system_booting_1.html">Android系统启动分析(一)</a>
+<br>
+第二篇文章:<a href="./android_system_booting_2.html">Android系统启动分析(二)</a></p>
+<p>本节涉及到的文件有:
+
+<table>
+	<tr>
+		<td>文件</td>
+		<td>路径</td>
+	</tr>
+	<tr>
+		<td>ZygoteInit.java</td>
+		<td>frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</td>
+	</tr>
+	<tr>
+		<td>ZygoteServer.java</td>
+		<td>frameworks/base/core/java/com/android/internal/os/ZygoteServer.java</td>
+	</tr>
+	<tr>
+		<td>AndroidRuntime.cpp</td>
+		<td>frameworks/base/core/jni/AndroidRuntime.cpp</td>
+	</tr>
+	<tr>
+		<td>app_main.cpp</td>
+		<td>frameworks/base/cmds/app_process/app_main.cpp</td>
+	</tr><tr>
+		<td>RuntimeInit.cpp</td>
+		<td>frameworks/base/core/java/com/android/internal/os/RuntimeInit.java</td>
+	</tr>
+	<tr>
+		<td>SystemServer.java</td>
+		<td>frameworks/base/core/java/com/android/server/SystemServer.java</td>
+	</tr>
+	<tr>
+		<td>SystemServiceManager.java</td>
+<td>frameworks/base/services/core/java/com/android/server/SystemServiceManager.java</td>
+	</tr>
+</table>
+
+<a id="more"></a></p>
+<h2 id="三、SystemServer进程启动"><a href="#三、SystemServer进程启动" class="headerlink" title="三、SystemServer进程启动"></a>三、SystemServer进程启动</h2><p>在上节讲到了从Zygote进程启动SystemServer进程,本节将分析SystemServer进程的启动过程。</p>
+<h3 id="3-1-ZygoteInit-forkSystemServer"><a href="#3-1-ZygoteInit-forkSystemServer" class="headerlink" title="3.1 ZygoteInit.forkSystemServer"></a>3.1 ZygoteInit.forkSystemServer</h3><p>我们再来回顾下创建SystemServer的过程。</p>
+<table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> frameworks/base/core/java/com/android/internal/os/ZygoteInit.java </font></td></tr></table>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Runnable <span class="title">forkSystemServer</span><span class="params">(String abiList, String socketName,</span></span></span><br><span class="line"><span class="function"><span class="params">		ZygoteServer zygoteServer)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//准备一些启动参数</span></span><br><span class="line">	……</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		……</span><br><span class="line">		<span class="comment">//注释1:调用Zygote.forkSystemServer()</span></span><br><span class="line">		pid = Zygote.forkSystemServer(</span><br><span class="line">				parsedArgs.uid, parsedArgs.gid,</span><br><span class="line">				parsedArgs.gids,</span><br><span class="line">				parsedArgs.debugFlags,</span><br><span class="line">				<span class="keyword">null</span>,</span><br><span class="line">				parsedArgs.permittedCapabilities,</span><br><span class="line">				parsedArgs.effectiveCapabilities);</span><br><span class="line">	&#125; <span class="keyword">catch</span> (IllegalArgumentException ex) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(ex);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//如果pid == 0,当前代码逻辑运行在子进程中</span></span><br><span class="line">	<span class="keyword">if</span> (pid == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="comment">//如果有第二个Zygote,则等待第二个Zygote连接</span></span><br><span class="line">		<span class="keyword">if</span> (hasSecondZygote(abiList)) &#123;</span><br><span class="line">			waitForSecondaryZygote(socketName);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//注释2:关闭Zygote进程创建的Socket</span></span><br><span class="line">		zygoteServer.closeServerSocket();</span><br><span class="line">		<span class="comment">//注释3:处理SystemServer进程</span></span><br><span class="line">		<span class="keyword">return</span> handleSystemServerProcess(parsedArgs);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该部分涉及到SystemServer进程创建的主要是注释1、3两处。首先Zygote会通过forkSystemServer方法来创建一个新的进程启动SystemServer,同时返回进程pid,若pid==0,会调用handleSystemServerProcess处理SystemServer进程。在上节提到,forkSystemServer最终会调用nativeForkSystemServer()来处理,这里不会细说。
+注释2处:由Zygote创建的子进程默认拥有Zygote进程的Socket对象,而子进程用不上,所以这里调用了closeServerSocket来关闭Socket。</p>
+<h4 id="3-1-1-handleSystemServerProcess"><a href="#3-1-1-handleSystemServerProcess" class="headerlink" title="3.1.1 handleSystemServerProcess"></a>3.1.1 handleSystemServerProcess</h4><p>我们重点关注handleSystemServerProcess方法。</p>
+<table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> frameworks/base/core/java/com/android/internal/os/ZygoteInit.java </font></td></tr></table>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Runnable <span class="title">handleSystemServerProcess</span><span class="params">(ZygoteConnection.Arguments parsedArgs)</span> </span>&#123;</span><br><span class="line">	……</span><br><span class="line">	<span class="keyword">if</span> (parsedArgs.niceName != <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="comment">//设置进程名字为niceName:system_server</span></span><br><span class="line">		Process.setArgV0(parsedArgs.niceName);</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">//注释1</span></span><br><span class="line">	<span class="comment">//system/framework/&#123;services.jar,ethernet-service.jar,wifi-service.jar&#125;</span></span><br><span class="line">	<span class="keyword">final</span> String systemServerClasspath = Os.getenv(<span class="string">"SYSTEMSERVERCLASSPATH"</span>);</span><br><span class="line">	<span class="keyword">if</span> (systemServerClasspath != <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="comment">//注释2:执行dex优化</span></span><br><span class="line">		performSystemServerDexOpt(systemServerClasspath);</span><br><span class="line">		……</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (parsedArgs.invokeWith != <span class="keyword">null</span>) &#123;</span><br><span class="line">		……</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		ClassLoader cl = <span class="keyword">null</span>;</span><br><span class="line">		<span class="keyword">if</span> (systemServerClasspath != <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="comment">//注释3:创建类加载器并赋予当前线程</span></span><br><span class="line">			cl = createPathClassLoader(systemServerClasspath, parsedArgs.targetSdkVersion);</span><br><span class="line">			Thread.currentThread().setContextClassLoader(cl);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//注释4</span></span><br><span class="line">		<span class="keyword">return</span> ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs, cl);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处:systemServerClasspath路径为:/system/framework/services.jar:/system/framework/ethernet-service.jar:/system/framework/wifi-service.jar:/system/framework/com.android.location.provider.jar
+注释2处:调用performSystemServerDexOpt对注释1处几个jar包执行dex优化
+注释3处:创建类加载器并赋予当前线程
+注释4处:将启动SystemServer的参数解析后的剩余参数”com.android.server.SystemServer”保存到parsedArgs.remainingArgs,并传入ZygoteInit.zygoteInit()中</p>
+<h4 id="3-1-2-ZygoteInit-zygoteInit"><a href="#3-1-2-ZygoteInit-zygoteInit" class="headerlink" title="3.1.2 ZygoteInit.zygoteInit"></a>3.1.2 ZygoteInit.zygoteInit</h4><table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> frameworks/base/core/java/com/android/internal/os/ZygoteInit.java </font></td></tr></table>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Runnable <span class="title">zygoteInit</span><span class="params">(<span class="keyword">int</span> targetSdkVersion, String[] argv, ClassLoader classLoader)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//初始化Android Log输出流，重定向System.out和System.err到Android Log</span></span><br><span class="line">	RuntimeInit.redirectLogStreams();</span><br><span class="line">	<span class="comment">//注释1:初始化通用的运行环境</span></span><br><span class="line">	RuntimeInit.commonInit();</span><br><span class="line">	<span class="comment">//注释2:通过JNI初始化Zygote</span></span><br><span class="line">	ZygoteInit.nativeZygoteInit();</span><br><span class="line">	<span class="comment">//注释3:应用初始化</span></span><br><span class="line">	<span class="keyword">return</span> RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处:初始化通用运行环境,如设置默认的未捕捉异常的Handler,设置时区,重置Log配置等
+重点看看注释2处:ZygoteInit.nativeZygoteInit()和注释3处:RuntimeInit.applicationInit()</p>
+<h4 id="3-1-3-启动Binder线程池"><a href="#3-1-3-启动Binder线程池" class="headerlink" title="3.1.3 启动Binder线程池"></a>3.1.3 启动Binder线程池</h4><table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> frameworks/base/core/jni/AndroidRuntime.cpp </font></td></tr></table>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">com_android_internal_os_ZygoteInit_nativeZygoteInit</span><span class="params">(JNIEnv* env, jobject clazz)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    gCurRuntime-&gt;onZygoteInit();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> frameworks/base/cmds/app_process/app_main.cpp </font></td></tr></table>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">onZygoteInit</span><span class="params">()</span></span>&#123;</span><br><span class="line">	sp&lt;ProcessState&gt; proc = ProcessState::self();</span><br><span class="line">	proc-&gt;startThreadPool(); <span class="comment">//启动新的binder线程</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该处代码主要工作是打开”/dev/binder”设备节点,并启动一个新的binder线程,这样SystemServer进程就可以使用Binder进行进程间通信。</p>
+<h4 id="3-1-4-RuntimeInit-applicationInit"><a href="#3-1-4-RuntimeInit-applicationInit" class="headerlink" title="3.1.4 RuntimeInit.applicationInit"></a>3.1.4 RuntimeInit.applicationInit</h4><table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> frameworks/base/core/java/com/android/internal/os/RuntimeInit.java  </font></td></tr></table>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">static</span> Runnable <span class="title">applicationInit</span><span class="params">(<span class="keyword">int</span> targetSdkVersion, String[] argv,ClassLoader classLoader)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//设置关闭应用程序是否调用AppRuntime.onExit()</span></span><br><span class="line">	nativeSetExitWithoutCleanup(<span class="keyword">true</span>);</span><br><span class="line">	<span class="comment">//设置虚拟机堆内存利用率为0.75</span></span><br><span class="line">	VMRuntime.getRuntime().setTargetHeapUtilization(<span class="number">0.75f</span>);</span><br><span class="line">	VMRuntime.getRuntime().setTargetSdkVersion(targetSdkVersion);</span><br><span class="line">	<span class="keyword">final</span> Arguments args = <span class="keyword">new</span> Arguments(argv);</span><br><span class="line">	<span class="comment">//注释1</span></span><br><span class="line">	<span class="keyword">return</span> findStaticMain(args.startClass, args.startArgs, classLoader);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处:调用findStaticMain()反射获取到SystemServer的main()方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Runnable <span class="title">findStaticMain</span><span class="params">(String className, String[] argv,</span></span></span><br><span class="line"><span class="function"><span class="params">		ClassLoader classLoader)</span> </span>&#123;</span><br><span class="line">	Class&lt;?&gt; cl;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//反射得到SystemServer类</span></span><br><span class="line">		cl = Class.forName(className, <span class="keyword">true</span>, classLoader);</span><br><span class="line">	&#125; <span class="keyword">catch</span> (ClassNotFoundException ex) &#123;</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">	Method m;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//反射获取SystemServer.main()方法</span></span><br><span class="line">		m = cl.getMethod(<span class="string">"main"</span>, <span class="keyword">new</span> Class[] &#123; String[].class &#125;);</span><br><span class="line">	&#125; <span class="keyword">catch</span> (NoSuchMethodException ex) &#123;</span><br><span class="line">	&#125; <span class="keyword">catch</span> (SecurityException ex) &#123;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> modifiers = m.getModifiers();</span><br><span class="line">	<span class="keyword">if</span> (! (Modifier.isStatic(modifiers) &amp;&amp; Modifier.isPublic(modifiers))) &#123;</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">new</span> MethodAndArgsCaller(m, argv);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该处主要作用是先反射得到SystemServer类并获取其main方法,将其传给MethodAndArgsCaller,并返回。MethodAndArgsCaller是一个Runnale实现类,其run()方法里反射调用传进去的Method,在这里就是SystemServer.main()方法,最后run()在ZygoteInit.main()中调用。</p>
+<h3 id="3-2-解析SystemServer"><a href="#3-2-解析SystemServer" class="headerlink" title="3.2 解析SystemServer"></a>3.2 解析SystemServer</h3><table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> frameworks/base/core/java/com/android/server/SystemServer.java  </font></td></tr></table>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">new</span> SystemServer().run();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>SystemServer的main方法做的事很简单,只是调用了SystemServer().run()
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		<span class="comment">//初始化时区</span></span><br><span class="line">		<span class="comment">//变更虚拟机的库文件</span></span><br><span class="line">		SystemProperties.set(<span class="string">"persist.sys.dalvik.vm.lib.2"</span>, VMRuntime.getRuntime().vmLibrary());</span><br><span class="line">		……</span><br><span class="line">		<span class="comment">//创建消息Looper</span></span><br><span class="line">		Looper.prepareMainLooper();</span><br><span class="line">		<span class="comment">//加载android_servers.so库</span></span><br><span class="line">		System.loadLibrary(<span class="string">"android_servers"</span>);</span><br><span class="line">		……</span><br><span class="line">		<span class="comment">//初始化系统Context</span></span><br><span class="line">		createSystemContext();</span><br><span class="line"></span><br><span class="line">		<span class="comment">//创建SystemServiceManager</span></span><br><span class="line">		mSystemServiceManager = <span class="keyword">new</span> SystemServiceManager(mSystemContext);</span><br><span class="line">		……</span><br><span class="line">		LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);</span><br><span class="line">		<span class="comment">//准备线程池</span></span><br><span class="line">		SystemServerInitThreadPool.get();</span><br><span class="line">	&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Start services.</span></span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		<span class="comment">//启动引导服务</span></span><br><span class="line">		startBootstrapServices();</span><br><span class="line">		<span class="comment">//启动核心服务</span></span><br><span class="line">		startCoreServices();</span><br><span class="line">		<span class="comment">//启动其他服务</span></span><br><span class="line">		startOtherServices();</span><br><span class="line">		SystemServerInitThreadPool.shutdown();</span><br><span class="line">	&#125; <span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">		<span class="keyword">throw</span> ex;</span><br><span class="line">	&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">	&#125;</span><br><span class="line">	……</span><br><span class="line">	<span class="comment">// Loop forever.</span></span><br><span class="line">	Looper.loop();</span><br><span class="line">	<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Main thread loop unexpectedly exited"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>SystemServer.run方法创建了一个SystemServiceManager对象,并将其加到LocalServices中,其内部有一个ArrayMap用来保存添加的服务。
+startBootstrapServices()、startCoreServices()和startOtherServices()分别用来启动引导服务、核心服务和其他服务。</p>
+<h4 id="3-2-1-startBootstrapServices"><a href="#3-2-1-startBootstrapServices" class="headerlink" title="3.2.1 startBootstrapServices"></a>3.2.1 startBootstrapServices</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startBootstrapServices</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	Installer installer = mSystemServiceManager.startService(Installer.class);</span><br><span class="line">	……</span><br><span class="line">	mActivityManagerService = mSystemServiceManager.startService(</span><br><span class="line">			ActivityManagerService.Lifecycle.class).getService();</span><br><span class="line">	mActivityManagerService.setSystemServiceManager(mSystemServiceManager);</span><br><span class="line">	mActivityManagerService.setInstaller(installer);</span><br><span class="line"></span><br><span class="line">	mPowerManagerService = mSystemServiceManager.startService(PowerManagerService.class);</span><br><span class="line">	mActivityManagerService.initPowerManagement();</span><br><span class="line"></span><br><span class="line">	mSystemServiceManager.startService(LightsService.class);</span><br><span class="line">	</span><br><span class="line">	mDisplayManagerService = mSystemServiceManager.startService(DisplayManagerService.class);</span><br><span class="line">	mSystemServiceManager.startBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);</span><br><span class="line">	mPackageManagerService = PackageManagerService.main(mSystemContext, installer,mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);</span><br><span class="line">	mSystemServiceManager.startService(UserManagerService.LifeCycle.class);</span><br><span class="line">	……</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上面可以看出,在startBootstrapServices里面启动了很多服务,如ActivityManagerService、PowerManagerService、LightsService、DisplayManagerService、PackageManagerService、UserManagerService等</p>
+<h4 id="3-2-2-startCoreServices"><a href="#3-2-2-startCoreServices" class="headerlink" title="3.2.2 startCoreServices"></a>3.2.2 startCoreServices</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startCoreServices</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	mSystemServiceManager.startService(DropBoxManagerService.class);</span><br><span class="line">	mSystemServiceManager.startService(BatteryService.class);</span><br><span class="line">	……</span><br><span class="line">	mSystemServiceManager.startService(UsageStatsService.class);</span><br><span class="line">	……</span><br><span class="line">	mActivityManagerService.setUsageStatsManager(</span><br><span class="line">			LocalServices.getService(UsageStatsManagerInternal.class));</span><br><span class="line">	……</span><br><span class="line">	mWebViewUpdateService = mSystemServiceManager.startService(WebViewUpdateService.class);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>startCoreServices中启动了DropBoxManagerService、BatteryService、UsageStatsService、WebViewUpdateService等服务</p>
+<h4 id="3-2-3-startOtherServices"><a href="#3-2-3-startOtherServices" class="headerlink" title="3.2.3 startOtherServices"></a>3.2.3 startOtherServices</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startOtherServices</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Context context = mSystemContext;</span><br><span class="line">	VibratorService vibrator = <span class="keyword">null</span>;</span><br><span class="line">	IStorageManager storageManager = <span class="keyword">null</span>;</span><br><span class="line">	NetworkManagementService networkManagement = <span class="keyword">null</span>;</span><br><span class="line">	NetworkStatsService networkStats = <span class="keyword">null</span>;</span><br><span class="line">	NetworkPolicyManagerService networkPolicy = <span class="keyword">null</span>;</span><br><span class="line">	ConnectivityService connectivity = <span class="keyword">null</span>;</span><br><span class="line">	NetworkScoreService networkScore = <span class="keyword">null</span>;</span><br><span class="line">	NsdService serviceDiscovery= <span class="keyword">null</span>;</span><br><span class="line">	WindowManagerService wm = <span class="keyword">null</span>;</span><br><span class="line">	SerialService serial = <span class="keyword">null</span>;</span><br><span class="line">	NetworkTimeUpdateService networkTimeUpdater = <span class="keyword">null</span>;</span><br><span class="line">	CommonTimeManagementService commonTimeMgmtService = <span class="keyword">null</span>;</span><br><span class="line">	InputManagerService inputManager = <span class="keyword">null</span>;</span><br><span class="line">	TelephonyRegistry telephonyRegistry = <span class="keyword">null</span>;</span><br><span class="line">	ConsumerIrService consumerIr = <span class="keyword">null</span>;</span><br><span class="line">	MmsServiceBroker mmsService = <span class="keyword">null</span>;</span><br><span class="line">	HardwarePropertiesManagerService hardwarePropertiesService = <span class="keyword">null</span>;</span><br><span class="line">	FaceIdManagerService faceIdService = <span class="keyword">null</span>;</span><br><span class="line">	……</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>startOtherServices启动的服务较多,且逻辑与上述两个方法相似,便不再分析。</p>
+<h4 id="3-2-4-系统服务的启动"><a href="#3-2-4-系统服务的启动" class="headerlink" title="3.2.4 系统服务的启动"></a>3.2.4 系统服务的启动</h4><p>从3.2节可以看到,系统服务的启动一般都是通过SystemServiceManager.startService来完成。这里以ActivityManagerService的启动来分析。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mActivityManagerService = mSystemServiceManager.startService(</span><br><span class="line">			ActivityManagerService.Lifecycle.class).getService();</span><br></pre></td></tr></table></figure>
+<p>ActivityManagerService通过SystemServiceManager.startService来启动,startService方法如下所示:</p>
+<table><tr><td bgcolor="#D2D2D2"><font face="微软雅黑"> frameworks/base/services/core/java/com/android/server/SystemServiceManager.java</font></td></tr></table>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;T extends SystemService&gt; <span class="function">T <span class="title">startService</span><span class="params">(Class&lt;T&gt; serviceClass)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		<span class="keyword">final</span> String name = serviceClass.getName();</span><br><span class="line">		<span class="keyword">if</span> (!SystemService.class.isAssignableFrom(serviceClass)) &#123;</span><br><span class="line">			……</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">final</span> T service;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//获取类的构造器</span></span><br><span class="line">			Constructor&lt;T&gt; constructor = serviceClass.getConstructor(Context.class);</span><br><span class="line">			service = constructor.newInstance(mContext);</span><br><span class="line">		&#125; <span class="keyword">catch</span> (InstantiationException ex) &#123;</span><br><span class="line">			……</span><br><span class="line">		&#125; <span class="keyword">catch</span> (IllegalAccessException ex) &#123;</span><br><span class="line">			……</span><br><span class="line">		&#125; <span class="keyword">catch</span> (NoSuchMethodException ex) &#123;</span><br><span class="line">			……</span><br><span class="line">		&#125; <span class="keyword">catch</span> (InvocationTargetException ex) &#123;</span><br><span class="line">			……</span><br><span class="line">		&#125;</span><br><span class="line">        <span class="comment">//将service传给startService</span></span><br><span class="line">		startService(service);</span><br><span class="line">		<span class="keyword">return</span> service;</span><br><span class="line">	&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">		……</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法先获取到ActivityManagerService.LiftCycle的构造,再构造出一个LiftCycle的对象,最后将LiftCycle的对象传给重载方法startService(final SystemService service)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startService</span><span class="params">(@NonNull <span class="keyword">final</span> SystemService service)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//注释1</span></span><br><span class="line">	mServices.add(service);</span><br><span class="line">	<span class="keyword">long</span> time = SystemClock.elapsedRealtime();</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//注释2</span></span><br><span class="line">		service.onStart();</span><br><span class="line">	&#125; <span class="keyword">catch</span> (RuntimeException ex) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Failed to start service "</span> + service.getClass().getName()</span><br><span class="line">				+ <span class="string">": onStart threw an exception"</span>, ex);</span><br><span class="line">	&#125;</span><br><span class="line">	warnIfTooLong(SystemClock.elapsedRealtime() - time, service, <span class="string">"onStart"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处:将service对象添加到mServices中,mServices是一个存储SystemService的ArrayList,其定义如下:</p>
+<p><strong>private final ArrayList<systemservice> mServices = new ArrayList<systemservice>();</systemservice></systemservice></strong></p>
+<p>注释2处:回调ActivityManagerService.LiftCycle对象的onStart方法完成启动ActivityManagerService</p>
+<h3 id="3-3-SystemServer进程总结"><a href="#3-3-SystemServer进程总结" class="headerlink" title="3.3 SystemServer进程总结"></a>3.3 SystemServer进程总结</h3><p>SystemService进程是Android中一个很重要的进程,由Zygote进启动,其启动过程中主要做了如下工作:</p>
+<ol>
+<li>初始化一些系统变量和运行环境</li>
+<li>启动Binder线程池</li>
+<li>创建消息Looper、加载类库、初始化系统Context、创建SystemServiceManager等</li>
+<li>启动各种系统服务</li>
+</ol>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="https://blog.csdn.net/hongbochen1223/article/details/56331690" target="_blank" rel="noopener">https://blog.csdn.net/hongbochen1223/article/details/56331690</a>
+<a href="https://juejin.im/post/5aaf125d6fb9a028db587c50" target="_blank" rel="noopener">https://juejin.im/post/5aaf125d6fb9a028db587c50</a>
+<a href="https://blog.csdn.net/itachi85/article/details/54783506" target="_blank" rel="noopener">https://blog.csdn.net/itachi85/article/details/54783506</a>
+<a href="https://blog.csdn.net/zhonglunshun/article/details/78615980" target="_blank" rel="noopener">https://blog.csdn.net/zhonglunshun/article/details/78615980</a>
+<a href="https://juejin.im/post/59f4592e51882529405991cb#heading-6" target="_blank" rel="noopener">https://juejin.im/post/59f4592e51882529405991cb#heading-6</a>
+<a href="https://blog.csdn.net/qq_30993595/article/details/82747738" target="_blank" rel="noopener">https://blog.csdn.net/qq_30993595/article/details/82747738</a>
+<a href="https://github.com/yipianfengye/androidSource/blob/master/9%20SystemServer%E8%BF%9B%E7%A8%8B%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B.md" target="_blank" rel="noopener">SystemServer进程启动流程</a></p>
+
+        
+    </section>
+</article>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "1d3d074e112b21d4b16b",
+        clientSecret: "6cf434c1ab62299c7424dc86f574505eb2c1d175",
+        repo: "pomelojiang.github.io",
+        owner: "pomelojiang",
+        admin: ["pomelojiang"],
+        id: "android_system_booting_3.html",
+        distractionFreeMode: true,
+        title: "Android系统启动分析(三)",
+        body: "http://pomelojiang.github.io/android_system_booting_3.html",
+        labels: ["Frameworks","Android"]
+    }).render('comments');
+    </script>
+</div>
+
+</div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/1.9.0/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+            
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle();
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp();
+            }, 3000);
+        }
+    });
+    </script>
+    
+        <script type="text/javascript" src="/js/scrollspy.min.js"></script>
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+        </script>
+    
+
+</body>
+</html>
