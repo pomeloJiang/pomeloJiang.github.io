@@ -1,1 +1,1 @@
-http://pomelojiang.github.io/java_sourcecode_arraylist.html
+http://pomelojiang.github.io/java_sourcecode_linkedlist.html

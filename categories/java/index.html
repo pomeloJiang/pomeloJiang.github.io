@@ -120,6 +120,53 @@
     <header class="article-header">
         
         <h1 itemprop="name">
+            <a href="/java_sourcecode_linkedlist.html">JAVA源码-LinkedList源码分析</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="http://pomelojiang.github.io/categories/java/index.html">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2019-03-02T16:00:00.000Z" itemprop="datePublished">2019-03-03</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/JAVA/">JAVA</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p><strong>本文的分析基于Java 1.8源码。</strong></p>
+<p>上篇分析了ArrayList的源码，点击这里:<a href="./java_sourcecode_arraylist.html">ArrayList源码解析</a><br>这篇将从构造方法、增删改查、遍历角度分析LinkedList源码。</p>
+<p>LinkedList是基于链表实现的List。老规矩，先看看类图</p>
+<p><img src="..\images\2019-03-03-LinkedList-ClassDiagram.jpg" alt="LinkedList"></p>
+<p>同ArrayList，LinkedList也是继承自AbstractList类,是Collection的子类之一，同时实现了Serializable、Cloneable接口，这就意味着：它支持序列化，能被克隆。与ArrayList不同的是，它并没有实现RandomAccess接口，也就是它不能通过下标随机访问。</p>
+<p>与ArrayList最大的区别是，LinkedList实现了Deque接口。因此LinkedList不仅有List的特性，也有Queue的特性。</p>
+        
+        <p class="article-more-link">
+            <a href="/java_sourcecode_linkedlist.html#more">
+                <span class="vm">阅读更多</span>
+                <i class="icon-arrow-double-right vm"></i>    
+            </a>
+        </p>
+        
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope="" itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
             <a href="/java_sourcecode_arraylist.html">JAVA源码-ArrayList源码分析</a>
         </h1>
         
